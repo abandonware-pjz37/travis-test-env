@@ -56,22 +56,22 @@ script:
 
   # Info about memory
   - if [[ "`uname`" == "Linux" ]]; then cat /proc/meminfo; fi
-  - if [[ "`uname`" == "Linux" ]]; then free -h; fi
-  - if [[ "`uname`" == "Darwin" ]]; then sysctl vm.memsize; fi
+  - if [[ "`uname`" == "Linux" ]]; then free -m; fi # Show in megabytes (Note: `free -h` not available)
+  - if [[ "`uname`" == "Darwin" ]]; then sysctl hw.memsize; fi
   - if [[ "`uname`" == "Darwin" ]]; then sysctl vm.swapusage; fi
 
-  # Info about disk space
-  - df -H
+  # Info about disk space (1K block size)
+  - df -k
 
   # Clean brew test
   # * https://github.com/travis-ci/travis-ci/issues/5820
   - if [[ "`uname`" == "Darwin" ]]; then brew cleanup; fi
-  - if [[ "`uname`" == "Darwin" ]]; then df -H; fi
+  - if [[ "`uname`" == "Darwin" ]]; then df -k; fi
 
   - if [[ "`uname`" == "Darwin" ]]; then BREW_CACHE_DIR=`brew --cache`; fi
   - if [[ "`uname`" == "Darwin" ]]; then du -hs "${BREW_CACHE_DIR}"; fi
   - if [[ "`uname`" == "Darwin" ]]; then rm -rf "${BREW_CACHE_DIR}"; fi
-  - if [[ "`uname`" == "Darwin" ]]; then df -H; fi
+  - if [[ "`uname`" == "Darwin" ]]; then df -k; fi
 
   # Test python still works :)
   - python3 --version
