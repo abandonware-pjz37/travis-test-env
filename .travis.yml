@@ -33,6 +33,10 @@ script:
   # Info about disk space (1K block size)
   - df -k
 
+  # Info about Xcode
+  - if [[ "`uname`" == "Darwin" ]]; then xcode-select -print-path; fi
+  - if [[ "`uname`" == "Darwin" ]]; then xcodebuild -version; fi
+
   # Clean brew test
   # * https://github.com/travis-ci/travis-ci/issues/5820
   - if [[ "`uname`" == "Darwin" ]]; then brew cleanup; fi
