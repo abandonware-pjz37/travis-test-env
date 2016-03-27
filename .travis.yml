@@ -1,0 +1,78 @@
+# OSX/Linux (https://github.com/travis-ci-tester/toolchain-table)
+
+language:
+  - cpp
+
+os:
+  - linux
+  - osx
+
+# Container-based infrastructure (Linux)
+# * https://docs.travis-ci.com/user/migrating-from-legacy/#How-can-I-use-container-based-infrastructure%3F
+sudo:
+  - false
+
+# Install packages differs for container-based infrastructure
+# * https://docs.travis-ci.com/user/migrating-from-legacy/#How-do-I-install-APT-sources-and-packages%3F
+# * http://stackoverflow.com/a/30925448/2288008
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+
+    packages:
+      - python3
+
+      # python3-pip package is not available, use 'easy_install3':
+      # * https://github.com/travis-ci/apt-package-whitelist/issues/768
+      - python3-setuptools # easy_install3
+
+      # https://github.com/travis-ci-tester/travis-test-clang-cxx-11
+      - libstdc++-4.8-dev
+
+      # https://github.com/travis-ci-tester/travis-test-gcc-cxx-11
+      - g++-4.8
+
+install:
+  # Install Python 3
+  - if [[ "`uname`" == "Darwin" ]]; then brew install python3; fi
+
+  # Install Python package 'requests'
+  # 'easy_install3' is not installed by 'brew install python3' on OS X 10.9 Maverick
+  - if [[ "`uname`" == "Darwin" ]]; then pip3 install requests; fi
+  - if [[ "`uname`" == "Linux" ]]; then easy_install3 --user requests; fi
+
+script:
+  # Info about OS
+  - uname -a
+  - if [[ "`uname`" == "Darwin" ]]; then sw_vers; fi
+  - if [[ "`uname`" == "Linux" ]]; then lsb_release --all; fi
+
+  # Info about CPU
+  - if [[ "`uname`" == "Linux" ]]; then cat /proc/cpuinfo; fi
+  - if [[ "`uname`" == "Darwin" ]]; then sysctl -a | grep machdep.cpu; fi
+  - if [[ "`uname`" == "Darwin" ]]; then sysctl hw.physicalcpu; fi
+  - if [[ "`uname`" == "Darwin" ]]; then sysctl hw.logicalcpu; fi
+
+  # Info about memory
+  - if [[ "`uname`" == "Linux" ]]; then cat /proc/meminfo; fi
+  - if [[ "`uname`" == "Linux" ]]; then free -h; fi
+  - if [[ "`uname`" == "Darwin" ]]; then sysctl vm.memsize; fi
+  - if [[ "`uname`" == "Darwin" ]]; then sysctl vm.swapusage; fi
+
+  # Info about disk space
+  - df -H
+
+  # Clean brew test
+  # * https://github.com/travis-ci/travis-ci/issues/5820
+  - if [[ "`uname`" == "Darwin" ]]; then brew cleanup; fi
+  - if [[ "`uname`" == "Darwin" ]]; then df -H; fi
+
+  - if [[ "`uname`" == "Darwin" ]]; then BREW_CACHE_DIR=`brew --cache`; fi
+  - if [[ "`uname`" == "Darwin" ]]; then du -hs "${BREW_CACHE_DIR}"; fi
+  - if [[ "`uname`" == "Darwin" ]]; then rm -rf "${BREW_CACHE_DIR}"; fi
+  - if [[ "`uname`" == "Darwin" ]]; then df -H; fi
+
+  # Test python still works :)
+  - python3 --version
+  - python3 -c 'import requests'
